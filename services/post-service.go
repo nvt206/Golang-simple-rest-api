@@ -2,8 +2,12 @@ package services
 
 import (
 	"demo/common"
-	"demo/models"
+	"demo/models/dto"
+	"errors"
+	"fmt"
+	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
+	"github.com/mitchellh/mapstructure"
 	"sync"
 )
 
@@ -12,38 +16,42 @@ var postInstance *postService
 
 type PostService interface {
 
-	Post(post *models.Post) *models.Post
-	GetByUserAndCategory(userid,categoryid uint) []models.Post
-	FindListPost(condition interface{}) []models.Post
+	Post(ctx *gin.Context,post *dto.Post) (*dto.Post,error)
+	FindListPost(condition interface{}) ([]dto.Post,error)
 
 }
 type postService struct {
 	DB *gorm.DB
 }
 
-func (p postService) FindListPost(condition interface{}) []models.Post {
-	var posts []models.Post
+func (p postService) FindListPost(condition interface{}) ([]dto.Post,error) {
+	var posts []dto.Post
 	if err := p.DB.Debug().Where(condition).Find(&posts).Error;err!=nil {
-		return nil
+		return nil,err
 	}
-	return posts
-}
-
-func (p postService) GetByUserAndCategory(userid, categoryid uint) []models.Post {
-
-	var posts []models.Post
-	if err := p.DB.Debug().Where("user_id=? and category_id=?",userid,categoryid).Find(&posts).Error;err!=nil {
-		return nil
+	for i,_ :=range posts {
+		posts[i].Category =p.DB.Debug().Where("ID=?",posts[i].CategoryId).Find(&dto.Category{}).Value.(*dto.Category)
+		mapstructure.Decode(p.DB.Debug().Where("ID=?",posts[i].UserId).Find(&dto.User{}).Value.(*dto.User),&posts[i].UserInfo)
 	}
-	return posts
+	return posts,nil
 }
+func (p postService) Post(ctx *gin.Context,post *dto.Post) (*dto.Post,error) {
+	jwtService := NewJWTService()
+	if ! jwtService.IsPermit(post.UserId,ctx){
+		return nil,errors.New("Can not access")
+	}
+	if p.DB.Where("ID=?",post.CategoryId).Find(&dto.Category{}).RowsAffected ==0{
+		return nil,errors.New(fmt.Sprintf("Not exists category with id %v",post.CategoryId))
+	}
+
+	post.Category = p.DB.Where("ID=?",post.CategoryId).Find(&dto.Category{}).Value.(*dto.Category)
+	mapstructure.Decode(p.DB.Where("ID=?",post.UserId).Find(&dto.User{}).Value.(*dto.User),&post.UserInfo)
 
 
-func (p postService) Post(post *models.Post) *models.Post {
 	if err := p.DB.Create(&post).Error;err!=nil{
-		return nil
+		return nil, err
 	}
-	return post
+	return post,nil
 }
 
 func NewPostService() PostService {

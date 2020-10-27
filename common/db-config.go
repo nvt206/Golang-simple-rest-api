@@ -1,7 +1,7 @@
 package common
 
 import (
-	"demo/models"
+	"demo/models/dto"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"sync"
@@ -19,9 +19,9 @@ func ConnectData() *gorm.DB {
 				}
 
 				//migrate data
-				db.AutoMigrate(&models.User{})
-				db.AutoMigrate(&models.Category{})
-				db.AutoMigrate(&models.Post{})
+				db.AutoMigrate(&dto.User{})
+				db.AutoMigrate(&dto.Category{})
+				db.AutoMigrate(&dto.Post{})
 				DB = db
 			},
 		)

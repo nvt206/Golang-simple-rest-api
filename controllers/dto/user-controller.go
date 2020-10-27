@@ -1,11 +1,12 @@
 package dto
 
 import (
-	"demo/models"
+	"demo/models/dto"
 	"demo/services"
+	"demo/validations"
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 	"net/http"
-	"strconv"
 )
 
 type UserController interface {
@@ -21,87 +22,69 @@ type userController struct {
 
 func (u userController) Update(ctx *gin.Context) {
 
-	id,_ := strconv.Atoi(ctx.Param("id"))
-
-	jwtService := services.NewJWTService()
-
-	if ! jwtService.IsPermit(uint(id),ctx){
+	//update
+	res,err := u.service.Update(ctx)
+	if err!=nil{
 		ctx.JSON(http.StatusBadRequest,gin.H{
-			"error": "Can not access",
-		})
-		return
-	}
-
-	findUser := u.service.FindById(uint(id))
-
-	if findUser==nil{
-		ctx.JSON(http.StatusBadRequest,gin.H{
-			"error": "Not exists",
-		})
-		return
-	}
-
-	var user models.User
-	if err := ctx.ShouldBindJSON(&user);err!=nil{
-		ctx.JSON(http.StatusBadRequest,gin.H{
-			"error": err.Error(),
-		})
-		return
-	}
-	user.ID = uint(id)
-	res := u.service.Update(&user)
-	ctx.JSON(http.StatusNoContent,gin.H{
-		"user":res,
-	})
-
-}
-
-func (u userController) GetById(ctx *gin.Context) {
-
-	id,_ := strconv.Atoi(ctx.Param("id"))
-	var user models.User
-	user.ID = uint(id)
-
-	resUser := u.service.FindOne(&user)
-	if resUser==nil ||id==0{
-		ctx.JSON(http.StatusBadRequest,gin.H{
-			"error":"Not exits",
+			"error":err.Error(),
 		})
 		return
 	}
 
 	ctx.JSON(http.StatusOK,gin.H{
-		"user": resUser,
+		"code":http.StatusOK,
+		"data":res,
 	})
 
+}
+
+func (u userController) GetById(ctx *gin.Context) {
+	user,err := u.service.GetById(ctx)
+	if err !=nil{
+		ctx.JSON(http.StatusBadRequest,gin.H{
+			"error":err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK,gin.H{
+		"user":user,
+	})
 
 }
 
 func (u userController) Register(ctx *gin.Context) {
-	var user models.User
+
+	var user dto.User
 	if err := ctx.ShouldBindJSON(&user);err!=nil{
-		ctx.JSON(http.StatusBadRequest,gin.H{
-			"error": err.Error(),
+		ctx.AbortWithStatusJSON(http.StatusBadRequest,gin.H{
+			"error":validations.GetErrors(err.(validator.ValidationErrors)),
 		})
 		return
 	}
 
+	res,err := u.service.Register(&user)
 
-	res := u.service.Register(&user)
-	if res == nil{
+	if err!=nil{
 		ctx.JSON(http.StatusBadRequest,gin.H{
-			"error":"Invalid input",
+			"error":err.Error(),
 		})
 		return
 	}
-
 	ctx.JSON(http.StatusCreated,gin.H{
 		"user":res,
 	})
 }
 
 func (u userController) GetAll(ctx *gin.Context) {
-	users := u.service.GetAll()
+	users,err := u.service.GetAll(ctx)
+
+	if err !=nil {
+		ctx.JSON(http.StatusBadRequest,gin.H{
+			"error":err.Error(),
+		})
+		return
+	}
 
 	ctx.JSON(http.StatusOK,gin.H{
 		"users":users,

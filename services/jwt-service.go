@@ -20,7 +20,7 @@ type jwtService struct {
 }
 
 func (j jwtService) IsPermit(id uint,ctx *gin.Context) bool {
-	return id == j.GetClaims(ctx).ID
+	return id == j.GetClaims(ctx).ID || j.GetClaims(ctx).IsAdmin
 }
 
 func (j jwtService) GetToken(ctx *gin.Context) string {
@@ -41,7 +41,7 @@ func (j jwtService) GetClaims(ctx *gin.Context) *MyCustomClaims {
 
 type MyCustomClaims struct {
 	ID uint `json:"id"`
-	Email string `json:"email"`
+	IsAdmin bool `json:"is_admin"`
 	jwt.StandardClaims
 }
 

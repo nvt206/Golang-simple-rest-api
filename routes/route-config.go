@@ -17,21 +17,24 @@ func ConfigRoute()  {
 
 	r := gin.Default()
 
-	api := r.Group("/api")
+	r.POST("/login",controllers.Login)
+	r.POST("/register",UserController.Register)
+	api := r.Group("/api",middlewares.AuthorizeJWT())
 	{
-		api.POST("/login",controllers.Login)
-		api.POST("/register",UserController.Register)
 		users := api.Group("/users",middlewares.AuthorizeJWT())
 		{
 			users.GET("/",UserController.GetAll)
-			users.GET("/:id",UserController.GetById)
-			users.PUT("/update/:id",UserController.Update)
+			users.GET("/info",UserController.GetById)
+			users.PUT("/update",UserController.Update)
 
 		}
 		categories := api.Group("/categories")
 		{
-			categories.GET("/",CategoryController.GetAll)
-			categories.POST("/create",CategoryController.Post)
+			categories.GET("/",CategoryController.GetAll2)
+			categories.GET("/query",CategoryController.GetById)
+
+			categories.POST("/create",CategoryController.Post2)
+			categories.DELETE("/delete/:id",CategoryController.Delete)
 		}
 		posts := api.Group("/posts")
 		{
