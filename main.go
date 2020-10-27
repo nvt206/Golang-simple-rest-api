@@ -7,6 +7,7 @@ import (
 
 func main() {
 
+
 	common.ConnectData()
 	routes.ConfigRoute()
 }

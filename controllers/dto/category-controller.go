@@ -14,19 +14,17 @@ type CategoryController interface {
 
 	GetAll(ctx *gin.Context)
 	GetById(ctx *gin.Context)
-	GetAll2(ctx *gin.Context)
 	Post(ctx *gin.Context)
-	Post2(ctx *gin.Context)
 	Delete(ctx *gin.Context)
 
 }
 
 type categoryController struct {
 	services.BaseService
-	repo services.CategoryService
+	service services.CategoryService
 }
 
-func (c categoryController) Post2(ctx *gin.Context) {
+func (c categoryController) Post(ctx *gin.Context) {
 
 	var category dto.Category
 	if err := ctx.ShouldBindJSON(&category);err!=nil{
@@ -36,7 +34,7 @@ func (c categoryController) Post2(ctx *gin.Context) {
 		return
 	}
 
-	if err := c.BaseService.Create(&category);err!=nil{
+	if err := c.BaseService.Create(&category).Error;err!=nil{
 		ctx.JSON(http.StatusBadRequest,gin.H{
 			"error":err.Error(),
 		})
@@ -54,7 +52,7 @@ func (c categoryController) GetById(ctx *gin.Context) {
 	id,_ := strconv.Atoi(ctx.Query("id"))
 	var category dto.Category
 
-	if err:= c.BaseService.GetOne(&category,"ID=?",uint(id));err!=nil{
+	if err:= c.BaseService.GetOne(&category,"ID=?",uint(id)).Error;err!=nil{
 		ctx.JSON(http.StatusBadRequest,gin.H{
 			"error": err.Error(),
 		})
@@ -76,9 +74,17 @@ func (c categoryController) Delete(ctx *gin.Context) {
 		})
 		return
 	}
-	if err := c.repo.Delete(ctx,uint(id));err!=nil{
+
+	if !c.BaseService.IsAdmin(ctx){
 		ctx.JSON(http.StatusBadRequest,gin.H{
-			"error":err,
+			"error":"Can not access",
+		})
+		return
+	}
+
+	if err := c.BaseService.Delete(&dto.Category{},"ID=?",uint(id)).Error;err!=nil{
+		ctx.JSON(http.StatusBadRequest,gin.H{
+			"error":err.Error(),
 		})
 		return
 	}
@@ -88,36 +94,11 @@ func (c categoryController) Delete(ctx *gin.Context) {
 	})
 
 }
-
-func (c categoryController) Post(ctx *gin.Context) {
-
-	var category dto.Category
-
-	if err:= ctx.ShouldBindJSON(&category);err!=nil{
-		ctx.JSON(http.StatusBadRequest,gin.H{
-			"error":validations.GetErrors(err.(validator.ValidationErrors)),
-		})
-		return
-	}
-	res := c.repo.Post(&category)
-	ctx.JSON(http.StatusOK,gin.H{
-		"category":res,
-	})
-
-
-}
-
 func (c categoryController) GetAll(ctx *gin.Context) {
-	categories := c.repo.GetAll()
-	ctx.JSON(http.StatusOK,gin.H{
-		"categories":categories,
-	})
-}
-func (c categoryController) GetAll2(ctx *gin.Context) {
 
 	var categories []dto.Category
 
-	err := c.BaseService.GetList(&categories,"true")
+	err := c.BaseService.GetList(&categories,"true").Error
 	if err!=nil{
 		ctx.JSON(http.StatusOK,gin.H{
 			"error":err.Error(),
@@ -130,7 +111,8 @@ func (c categoryController) GetAll2(ctx *gin.Context) {
 }
 
 func NewCategoryController() CategoryController{
-	return &categoryController{repo: services.NewCategoryService(),BaseService:services.NewBaseService()}
-
-
+	return &categoryController{
+		service: services.NewCategoryService(),
+		BaseService:services.NewBaseService(),
+	}
 }

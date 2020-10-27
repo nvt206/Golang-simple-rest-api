@@ -30,17 +30,18 @@ func ConfigRoute()  {
 		}
 		categories := api.Group("/categories")
 		{
-			categories.GET("/",CategoryController.GetAll2)
+			categories.GET("/",CategoryController.GetAll)
 			categories.GET("/query",CategoryController.GetById)
 
-			categories.POST("/create",CategoryController.Post2)
+			categories.POST("/create",CategoryController.Post)
 			categories.DELETE("/delete/:id",CategoryController.Delete)
 		}
 		posts := api.Group("/posts")
 		{
-
+			posts.GET("/",PostController.GetPosts)
 			posts.GET("/query",PostController.GetPostByUserAndCategory)// query?categoryid=1&userid=1
-			posts.POST("/create",middlewares.AuthorizeJWT(),PostController.Post)
+			posts.POST("/create",PostController.Post)
+			posts.DELETE("/delete/:id",PostController.Delete)
 		}
 	}
 	r.Run()

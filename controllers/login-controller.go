@@ -14,7 +14,7 @@ import (
 )
 
 var (
-	UserService = services.NewUserService()
+	BaseService = services.NewBaseService()
 )
 func Login(ctx *gin.Context) {
 
@@ -28,14 +28,13 @@ func Login(ctx *gin.Context) {
 	}
 	email := validation.Email
 	password := validation.Password
-	user := UserService.FindOne(&dto.User{Email: email})
+	user := BaseService.GetOne(&dto.User{},"email=?",email).Value.(*dto.User)
 	if user == nil {
 		ctx.JSON(http.StatusBadRequest,gin.H{
 			"error":"Incorrect username or password",
 		})
 		return
 	}
-
 	if user.Password != password {
 		ctx.JSON(http.StatusBadRequest,gin.H{
 			"error":"Incorrect username or password",
@@ -46,7 +45,7 @@ func Login(ctx *gin.Context) {
 		user.ID,
 		user.IsAdmin,
 		jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Minute*5).Unix(),
+			ExpiresAt: time.Now().Add(time.Hour*24).Unix(),
 		},
 	}
 

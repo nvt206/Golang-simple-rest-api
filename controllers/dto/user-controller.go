@@ -1,12 +1,15 @@
 package dto
 
 import (
+	"demo/models"
 	"demo/models/dto"
 	"demo/services"
 	"demo/validations"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"github.com/mitchellh/mapstructure"
 	"net/http"
+	"strconv"
 )
 
 type UserController interface {
@@ -17,14 +20,52 @@ type UserController interface {
 }
 
 type userController struct {
-	 service services.UserService
+	services.BaseService
+	service services.UserService
 }
 
 func (u userController) Update(ctx *gin.Context) {
 
+	//bind user from client request
+	var user dto.User
+	if err := ctx.ShouldBindJSON(&user);err!=nil{
+		ctx.JSON(http.StatusBadRequest,gin.H{
+			"errors": validations.GetErrors(err.(validator.ValidationErrors)),
+		})
+		return
+	}
+
+	//Check role user update
+	// just user or admin can update
+	if !(u.BaseService.IsAdmin(ctx)||u.BaseService.IsRealUser(ctx,user.ID)){
+		ctx.JSON(http.StatusBadRequest,gin.H{
+			"error":"Can not access",
+		})
+		return
+	}
+
+
+	//find user by id
+	if err := u.BaseService.GetOne(&dto.User{},"ID=?",user.ID).Error;err!=nil{
+		ctx.JSON(http.StatusBadRequest,gin.H{
+			"error":err.Error(),
+		})
+		return
+	}
+
+	//check email exist
+
+	if u.BaseService.GetOne(&dto.User{},"email=?",user.Email).RowsAffected != 0{
+		ctx.JSON(http.StatusBadRequest,gin.H{
+			"error":"Email is exists!",
+		})
+		return
+	}
+
+
 	//update
-	res,err := u.service.Update(ctx)
-	if err!=nil{
+	res := u.BaseService.Update(&user)
+	if err:= res.Error;err!=nil{
 		ctx.JSON(http.StatusBadRequest,gin.H{
 			"error":err.Error(),
 		})
@@ -33,22 +74,28 @@ func (u userController) Update(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK,gin.H{
 		"code":http.StatusOK,
-		"data":res,
+		"data":res.Value,
 	})
 
 }
 
 func (u userController) GetById(ctx *gin.Context) {
-	user,err := u.service.GetById(ctx)
-	if err !=nil{
+
+	//get id
+	id,_ := strconv.Atoi(ctx.Query("id"))
+	//user,err := u.service.GetById(ctx)
+	res := u.BaseService.GetOne(&dto.User{},"ID=?",uint(id))
+	if err := res.Error; err !=nil{
 		ctx.JSON(http.StatusBadRequest,gin.H{
 			"error":err.Error(),
 		})
 		return
 	}
 
+	var userinfo models.UserInfo
+	mapstructure.Decode(res.Value,userinfo)
 	ctx.JSON(http.StatusOK,gin.H{
-		"user":user,
+		"user":userinfo,
 	})
 
 }
@@ -63,23 +110,34 @@ func (u userController) Register(ctx *gin.Context) {
 		return
 	}
 
-	res,err := u.service.Register(&user)
-
-	if err!=nil{
+	//res,err := u.service.Register(&user)
+	res := u.BaseService.Create(&user)
+	if err:=res.Error; err!=nil{
 		ctx.JSON(http.StatusBadRequest,gin.H{
 			"error":err.Error(),
 		})
 		return
 	}
+	var userInfo models.UserInfo
+	mapstructure.Decode(res.Value,userInfo)
 	ctx.JSON(http.StatusCreated,gin.H{
-		"user":res,
+		"user":userInfo,
 	})
 }
 
 func (u userController) GetAll(ctx *gin.Context) {
-	users,err := u.service.GetAll(ctx)
 
-	if err !=nil {
+	if ! u.BaseService.IsAdmin(ctx){
+		ctx.JSON(http.StatusBadRequest,gin.H{
+			"error":"Can not access",
+		})
+		return
+	}
+	var users []dto.User
+
+	res := u.BaseService.GetList(&users,"true");
+
+	if err := res.Error; err !=nil {
 		ctx.JSON(http.StatusBadRequest,gin.H{
 			"error":err.Error(),
 		})
@@ -92,5 +150,8 @@ func (u userController) GetAll(ctx *gin.Context) {
 
 }
 func NewUserController() UserController{
-	return &userController{service: services.NewUserService()}
+	return &userController{
+		service: services.NewUserService(),
+		BaseService: services.NewBaseService(),
+	}
 }
