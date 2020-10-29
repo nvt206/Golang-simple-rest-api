@@ -9,3 +9,10 @@ type User struct {
 	Address string `json:"address"`
 	IsAdmin bool `json:"is_admin"`
 }
+
+type UserInfo struct {
+	gorm.Model
+	Email string `json:"email" binding:"required,email"`
+	Address string `json:"address"`
+
+}

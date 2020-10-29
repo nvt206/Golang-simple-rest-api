@@ -1,20 +1,19 @@
 package controllers
 
 import (
-	"demo/models"
 	"demo/models/dto"
 	"demo/services"
 	"demo/validations"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
-	"github.com/mitchellh/mapstructure"
 	"net/http"
 	"time"
 )
 
 var (
 	BaseService = services.NewBaseService()
+	UserService= services.NewUserService()
 )
 func Login(ctx *gin.Context) {
 
@@ -31,12 +30,14 @@ func Login(ctx *gin.Context) {
 	user := BaseService.GetOne(&dto.User{},"email=?",email).Value.(*dto.User)
 	if user == nil {
 		ctx.JSON(http.StatusBadRequest,gin.H{
+			"code":http.StatusBadRequest,
 			"error":"Incorrect username or password",
 		})
 		return
 	}
 	if user.Password != password {
 		ctx.JSON(http.StatusBadRequest,gin.H{
+			"code":http.StatusBadRequest,
 			"error":"Incorrect username or password",
 		})
 		return
@@ -49,8 +50,7 @@ func Login(ctx *gin.Context) {
 		},
 	}
 
-	var userInfo models.UserInfo
-	mapstructure.Decode(user,&userInfo)
+	userInfo := UserService.ConvertUserToUserInfo(user)
 
 	jwtService := services.NewJWTService()
 	token := jwtService.GenerateTokenWithClaims(claims)

@@ -1,7 +1,6 @@
 package dto
 
 import (
-	"demo/models"
 	"demo/models/dto"
 	"demo/services"
 	"demo/validations"
@@ -92,7 +91,7 @@ func (u userController) GetById(ctx *gin.Context) {
 		return
 	}
 
-	var userinfo models.UserInfo
+	var userinfo dto.UserInfo
 	mapstructure.Decode(res.Value,userinfo)
 	ctx.JSON(http.StatusOK,gin.H{
 		"user":userinfo,
@@ -104,8 +103,9 @@ func (u userController) Register(ctx *gin.Context) {
 
 	var user dto.User
 	if err := ctx.ShouldBindJSON(&user);err!=nil{
-		ctx.AbortWithStatusJSON(http.StatusBadRequest,gin.H{
-			"error":validations.GetErrors(err.(validator.ValidationErrors)),
+		ctx.JSON(http.StatusBadRequest,gin.H{
+			"code":http.StatusBadRequest,
+			"errors":validations.GetErrors(err.(validator.ValidationErrors)),
 		})
 		return
 	}
@@ -118,8 +118,7 @@ func (u userController) Register(ctx *gin.Context) {
 		})
 		return
 	}
-	var userInfo models.UserInfo
-	mapstructure.Decode(res.Value,userInfo)
+	userInfo := u.service.ConvertUserToUserInfo(res.Value.(*dto.User))
 	ctx.JSON(http.StatusCreated,gin.H{
 		"user":userInfo,
 	})
@@ -135,7 +134,7 @@ func (u userController) GetAll(ctx *gin.Context) {
 	}
 	var users []dto.User
 
-	res := u.BaseService.GetList(&users,"true");
+	res := u.BaseService.GetList(&users,"true")
 
 	if err := res.Error; err !=nil {
 		ctx.JSON(http.StatusBadRequest,gin.H{

@@ -16,6 +16,7 @@ func AuthorizeJWT() gin.HandlerFunc {
 				"err":"Invalid token",
 			})
 		}
+		context.Next()
 	}
 
 }

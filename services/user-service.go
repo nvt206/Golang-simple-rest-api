@@ -2,7 +2,6 @@ package services
 
 import (
 	"demo/common"
-	"demo/models"
 	"demo/models/dto"
 	"github.com/jinzhu/gorm"
 	"github.com/mitchellh/mapstructure"
@@ -21,7 +20,7 @@ type UserService interface {
 	//Register(user *dto.User) (*dto.User,error)
 	//Update(ctx *gin.Context) (*dto.User,error)
 
-	ConvertUserToUserInfo(user *dto.User) *models.UserInfo
+	ConvertUserToUserInfo(user *dto.User) *dto.UserInfo
 
 }
 
@@ -29,9 +28,10 @@ type userService struct {
 	 DB *gorm.DB
 }
 
-func (u userService) ConvertUserToUserInfo(user *dto.User) *models.UserInfo {
-	var userInfo models.UserInfo
+func (u userService) ConvertUserToUserInfo(user *dto.User) *dto.UserInfo {
+	var userInfo dto.UserInfo
 	mapstructure.Decode(user,&userInfo)
+	userInfo.Model = user.Model
 	return &userInfo
 }
 
