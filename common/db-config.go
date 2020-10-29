@@ -12,12 +12,11 @@ func ConnectData() *gorm.DB {
 	if DB==nil{
 		once.Do(
 			func() {
-				db, err := gorm.Open("postgres", "host=localhost port=5432 user=postgres dbname=demo password=123 sslmode=disable")
-
+				db, err := gorm.Open("postgres",
+					"host=localhost port=5432 user=postgres dbname=demo password=123 sslmode=disable")
 				if err != nil {
 					panic("Fail to connect database ")
 				}
-
 				//migrate data
 				db.AutoMigrate(&dto.User{})
 				db.AutoMigrate(&dto.Category{})

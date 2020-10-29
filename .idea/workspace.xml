@@ -12,18 +12,8 @@
   <component name="ChangeListManager">
     <list default="true" id="2d9c2c52-eb76-4d9c-a3b0-7b52de503a6f" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/controllers/dto/category-controller.go" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/dto/category-controller.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/controllers/dto/post-controller.go" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/dto/post-controller.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/controllers/dto/user-controller.go" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/dto/user-controller.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/controllers/login-controller.go" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/login-controller.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/dto/post-model.go" beforeDir="false" afterPath="$PROJECT_DIR$/models/dto/post-model.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/user-infor-model.go" beforeDir="false" afterPath="$PROJECT_DIR$/models/user-info-model.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/db-config.go" beforeDir="false" afterPath="$PROJECT_DIR$/common/db-config.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/routes/route-config.go" beforeDir="false" afterPath="$PROJECT_DIR$/routes/route-config.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/base-service.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/base-service.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/category-service.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/category-service.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/post-service.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/post-service.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/user-service.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/user-service.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
