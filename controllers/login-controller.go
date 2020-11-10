@@ -15,6 +15,15 @@ var (
 	BaseService = services.NewBaseService()
 	UserService= services.NewUserService()
 )
+
+// @Summary Login
+// @Tags Login
+// @Accept json
+// @Produce  json
+// @Param body body  validations.LoginValidation true "body"
+// @Success 200 {string} json "{ "code": 200, "data": {}, "msg": "ok" }"
+// @Failure 400 {string} json
+// @Router /login [POST]
 func Login(ctx *gin.Context) {
 
 	var validation validations.LoginValidation

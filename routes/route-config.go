@@ -1,9 +1,12 @@
 package routes
+
 import (
 	"demo/controllers"
 	"demo/controllers/dto"
 	"demo/middlewares"
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 var (
 	UserController = dto.NewUserController()
@@ -38,5 +41,10 @@ func ConfigRoute()  {
 			posts.DELETE("/delete/:id",PostController.Delete)
 		}
 	}
+
+	// should check only dev can see this
+	//if(os.Getenv(constants.ENVIRONMENT) == constants.Development)
+	r.GET("/swagger/*any",ginSwagger.WrapHandler(swaggerFiles.Handler))
+
 	r.Run()
 }

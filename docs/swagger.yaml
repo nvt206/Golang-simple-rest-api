@@ -1,0 +1,69 @@
+definitions:
+  validations.LoginValidation:
+    properties:
+      email:
+        example: abc@gmail.com
+        type: string
+      password:
+        example: 123123@X
+        type: string
+    required:
+    - email
+    - password
+    type: object
+info:
+  contact: {}
+paths:
+  /login:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/validations.LoginValidation'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{ "code": 200, "data": {}, "msg": "ok" }'
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+      summary: Login
+      tags:
+      - Login
+  /register:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/validations.LoginValidation'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"code":200,"data":{},"msg":"message"}'
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Register User
+      tags:
+      - Auth
+swagger: "2.0"

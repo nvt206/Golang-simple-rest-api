@@ -99,6 +99,16 @@ func (u userController) GetById(ctx *gin.Context) {
 
 }
 
+
+// @Summary Register User
+// @Tags Auth
+// @Security ApiKeyAuth
+// @Accept json
+// @Produce  json
+// @Param   body  body   validations.LoginValidation  true "body"
+// @Success 200 {string} json "{"code":200,"data":{},"msg":"message"}"
+// @Failure 400 {string} json
+// @Router /register [POST]
 func (u userController) Register(ctx *gin.Context) {
 
 	var user dto.User
